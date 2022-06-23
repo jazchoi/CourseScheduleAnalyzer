@@ -1,2 +1,3 @@
-# Course Schedule Analyzer
+# Course Schedule Analyzer (WIP)
 A program that analyzes and makes commentary on a course schedule (intended for college courses).
+
