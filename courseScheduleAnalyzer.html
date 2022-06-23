@@ -6,49 +6,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Schedule Analyzer</title>
     <link rel="stylesheet" href="courseScheduleAnalyzer.css">
-
-    <!-- script to analyze and comment -->
-    <script>
-        let courseNames = {};
-        let courseTimes = {};
-        let totalCredits = 0;
-        
-        // WIP
-        
-    </script>
 </head>
 <body>
     <h1> Course Schedule Analyzer </h1>
-    <p> Input your course name, start time, end time, and number of credits into the form below to get an analysis and some commentary. </p>
+    <p> Input your course name, start time, end time, and number of credits into the form below to get an analysis and commentary. </p>
 
-    <!-- form to input names and times -->
-    <form method="GET">
-        <input type="text" placeholder="Course 1" class="course1"/>
-        <input type="time"  class="course1"/>
-        <input type="time" class="course1"/>
-        <input type="number" step="1" min="0" placeholder="Number of Credits" class="course1" />
-        <br>
-        <input type="text" placeholder="Course 2" class="course2"/>
-        <input type="time" class="course2"/>
-        <input type="time" class="course2"/>
-        <input type="number" step="1" min="0" placeholder="Number of Credits" class="course2" />
-        <br>
-        <input type="text" placeholder="Course 3" class="course3"/>
-        <input type="time" class="course3"/>
-        <input type="time" class="course3"/>
-        <input type="number" step="1" min="0" placeholder="Number of Credits" class="course3" />
-        <br>
-        <input type="text" placeholder="Course 4" class="course4"/>
-        <input type="time" class="course4"/>
-        <input type="time" class="course4"/>
-        <input type="number" step="1" min="0" placeholder="Number of Credits" class="course4" />
-        <br>
-        <input type="text" placeholder="Course 5" class="course5"/>
-        <input type="time" class="course5"/>
-        <input type="time" class="course5"/>
-        <input type="number" step="1" min="0" placeholder="Number of Credits" class="course5" />
-        <br>
-        <input type="submit" value="Analyze" />
-    </form>    
+    <!-- to input names and times (added in script) -->
+    <form id="inputCourses"> </form>
+
+    <!-- to add more course input slots -->
+    <input type="submit" value="Add More Courses" id="addCourses" />    
+
+    <!-- days to distinguish when classes are (WIP) -->
+    <form id="days">
+        <!-- checklist for courses under each day -->
+    </form>
+
+    <!-- to analyze and create commentary -->
+    <input type="submit" value="Analyze Courses" id="analyze" />
+    
+    <!-- analysis and commentary -->
+    <div id="analysis"></div>
 </body>
+
+ <script>
+    let courseInputs = 0;
+
+    document.addEventListener("DOMContentLoaded", function(){
+        for(let i = 1; i <= 5; i++) {
+            let courseInputNum = courseInputs + i;
+            let courseName = "<input type=\"text\" placeholder=\"Course " + courseInputNum + "\" class=\"course" + courseInputNum + "\"/> ";
+            let time = "<input type=\"time\" class=\"course" + courseInputNum + "\"/> ";
+            let credits = "<input type=\"number\" min=\"0\" placeholder=\"Number of Credits\" class=\"course" + courseInputNum + "\" /> ";
+            document.getElementById("inputCourses").innerHTML += courseName + time + time + credits + "<br>";
+        }
+        courseInputs += 5;
+    }, false);
+
+    // adds 5 more course inputs when button clicked
+    document.getElementById("addCourses").addEventListener("click", function(){
+        for(let i = 1; i <= 5; i++) {
+            let courseInputNum = courseInputs + i;
+            let courseName = "<input type=\"text\" placeholder=\"Course " + courseInputNum + "\" class=\"course" + courseInputNum + "\"/> ";
+            let time = "<input type=\"time\" class=\"course" + courseInputNum + "\"/> ";
+            let credits = "<input type=\"number\" min=\"0\" placeholder=\"Number of Credits\" class=\"course" + courseInputNum + "\" /> ";
+            document.getElementById("inputCourses").innerHTML += courseName + time + time + credits + "<br>";
+        }
+        courseInputs += 5;
+    }, false);
+
+    // runs analysis and gives commentary
+    document.getElementById("analyze").addEventListener("click", function(){
+        let courses = {};
+        let monday = {};
+        let tuesday = {};
+        let wednesday = {};
+        let thursday = {};
+        let friday = {};
+        let saturday = {};
+        let sunday = {};
+        let totalCredits = 0;
+        let analysis = document.getElementById("analysis");
+        analysis.textContent = "";
+
+        // adds to days the course names and times 
+        for(let i = 1; i <= courseInputs; i++) {
+            courses[i - 1] = document.getElementsByClassName("course" + i)[0].value; // names
+            // times (WIP)
+        }
+
+        // total credits
+        for(let i = 1; i <= courseInputs; i++) {
+            if(!isNaN(parseFloat(document.getElementsByClassName("course" + i)[3].value))) {
+                totalCredits += parseFloat(document.getElementsByClassName("course" + i)[3].value);
+            }
+        }
+
+        // commentary on the total number of credits
+        if (totalCredits > 0) {
+            analysis.textContent = "Analysis: You are taking a total of " + totalCredits + " credits. ";
+            if (totalCredits < 13) {
+                analysis.textContent += "This may not be enough credits to be considered a fulltime student. Please check with your school to confirm. ";
+            }
+            if (totalCredits > 16) {
+                analysis.textContent += "This may be a lot of credits to take in one semester. Consider taking less classes to prevent an overwhelming semester. "
+            }
+            if (totalCredits > 20) {
+                analysis.textContent += "This may be too many credits and you may be charged extra. Please check with your school to confirm. ";
+            }
+            analysis.textContent += "It is reccomended to take a total number of 15 credits per semester."
+        }
+
+        // WIP below
+        // if needed, commentary on how early the first class starts for each day
+
+        // if needed, commentary on how late the last class ends for each day
+
+        // if needed, commentary on the length of consecutive classes for each day
+
+    }, false);
+</script>
+
 </html>
