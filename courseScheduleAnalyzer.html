@@ -5,12 +5,50 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Schedule Analyzer</title>
+    <link rel="stylesheet" href="courseScheduleAnalyzer.css">
+
+    <!-- script to analyze and comment -->
+    <script>
+        let courseNames = {};
+        let courseTimes = {};
+        let totalCredits = 0;
+        
+        // WIP
+        
+    </script>
 </head>
 <body>
     <h1> Course Schedule Analyzer </h1>
+    <p> Input your course name, start time, end time, and number of credits into the form below to get an analysis and some commentary. </p>
 
-    <p>
-        Input
-    </p>
+    <!-- form to input names and times -->
+    <form method="GET">
+        <input type="text" placeholder="Course 1" class="course1"/>
+        <input type="time"  class="course1"/>
+        <input type="time" class="course1"/>
+        <input type="number" step="1" min="0" placeholder="Number of Credits" class="course1" />
+        <br>
+        <input type="text" placeholder="Course 2" class="course2"/>
+        <input type="time" class="course2"/>
+        <input type="time" class="course2"/>
+        <input type="number" step="1" min="0" placeholder="Number of Credits" class="course2" />
+        <br>
+        <input type="text" placeholder="Course 3" class="course3"/>
+        <input type="time" class="course3"/>
+        <input type="time" class="course3"/>
+        <input type="number" step="1" min="0" placeholder="Number of Credits" class="course3" />
+        <br>
+        <input type="text" placeholder="Course 4" class="course4"/>
+        <input type="time" class="course4"/>
+        <input type="time" class="course4"/>
+        <input type="number" step="1" min="0" placeholder="Number of Credits" class="course4" />
+        <br>
+        <input type="text" placeholder="Course 5" class="course5"/>
+        <input type="time" class="course5"/>
+        <input type="time" class="course5"/>
+        <input type="number" step="1" min="0" placeholder="Number of Credits" class="course5" />
+        <br>
+        <input type="submit" value="Analyze" />
+    </form>    
 </body>
 </html>
