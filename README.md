@@ -1,2 +1,2 @@
 # Course Schedule Analyzer
-A program to analyze and make commentary on a course schedule (intended for college courses).
+A program that analyzes and makes commentary on a course schedule (intended for college courses).
