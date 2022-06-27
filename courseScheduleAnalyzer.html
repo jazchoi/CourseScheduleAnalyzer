@@ -81,9 +81,12 @@
     document.getElementById("analyze").addEventListener("click", function(){
         let courses = {}; // will be a two-dimensional array of courses and start and end times
         let days = [[], [], [], [], [], [], []]; // each array indicates a day (index 0 is Monday, etc.)
+        let daysStrings = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         let totalCredits = 0;
         let creditAnalysis = document.getElementById("creditAnalysis");
         creditAnalysis.textContent = "";
+        let courseAnalysis = document.getElementById("courseAnalysis");
+        courseAnalysis.textContent = "";
 
         // adds to 'courses' array, calculates total credits, and adds a course to the days it takes place
         for(let courseNum = 1; courseNum <= courseInputs; courseNum++) {
@@ -143,7 +146,7 @@
         endTimes.insertCell(0).innerHTML = "End Times";
         load.insertCell(0).innerHTML = "Hours of Classes";
         
-        for (let day = 0; day < 7; day++) {
+        for (let day = 0; day < 7; day++) { // for each day, for all courses that occur in one day
             let startTimeDaily = "";
             let endTimeDaily = "";
             let loadDaily = 0;
@@ -154,40 +157,69 @@
                 } else if (course[1] < startTimeDaily) { // sets startTime if time is earlier
                     startTimeDaily = course[1];
                 }
+                
                 if (endTimeDaily < course[2]) { // sets endTime if time is later
                     endTimeDaily = course[2];
                 }
-                loadDaily += parseFloat(course[2]) - parseFloat(course[1]); // calculates daily number of hours of class
+
+                let startTimeFloat = parseFloat(course[1].substring(0, 2)) + (course[1].substring(3, 5) / 60);
+                let endTimeFloat = parseFloat(course[2].substring(0, 2)) + (course[2].substring(3, 5) / 60);
+                loadDaily += endTimeFloat - startTimeFloat; // calculates daily number of hours of class
             });
 
             // adds cells with information
-            if(startTimeDaily != "24:00") {
-                startTimes.insertCell(day + 1).innerHTML = startTimeDaily;
-            // } else {
-            //     startTimes.insertCell(day + 1).innerHTML = "";
+            let formattedStartTimeDaily = "";
+            if(startTimeDaily != "") {
+                if(startTimeDaily < "12:00") { // formats 24:00 time to 12-hour with AM
+                    formattedStartTimeDaily = (parseFloat(startTimeDaily)) + ":" + startTimeDaily.substring(3) + " AM";
+                } else { // formats 24:00 time to 12-hour with PM
+                    formattedStartTimeDaily = (parseFloat(startTimeDaily) - 12) + ":" + startTimeDaily.substring(3) + " PM";
+                }
             }
-            if(endTimeDaily != "00:00") {
-                endTimes.insertCell(day + 1).innerHTML = endTimeDaily;
-            // } else {
-            //     endTimes.insertCell(day + 1).innerHTML = "";
+            startTimes.insertCell(day + 1).innerHTML = formattedStartTimeDaily;
+            
+            let formattedEndTimeDaily = "";
+            if(endTimeDaily != "") {
+                if(endTimeDaily < "12:00") { // formats 24:00 time to 12-hour with AM
+                    formattedEndTimeDaily = (parseFloat(endTimeDaily)) + ":" + endTimeDaily.substring(3) + " AM";
+                } else { // formats 24:00 time to 12-hour with PM
+                    formattedEndTimeDaily = (parseFloat(endTimeDaily) - 12) + ":" + endTimeDaily.substring(3) + " PM";
+                }
             }
-            if(loadDaily == 1) {
-                load.insertCell(day + 1).innerHTML = loadDaily + " hour";
-            } else if(loadDaily >= 0) {
-                load.insertCell(day + 1).innerHTML = loadDaily + " hours";
-            }
-        }
+            endTimes.insertCell(day + 1).innerHTML = formattedEndTimeDaily;
 
+            if(loadDaily == 1) {
+                load.insertCell(day + 1).innerHTML = loadDaily.toFixed(2) + " hour";
+            } else {
+                load.insertCell(day + 1).innerHTML = loadDaily.toFixed(2) + " hours";
+            }
+
+            // commentary functions called
+            courseAnalysis.innerHTML += daysStrings[day] + ": " + startTimeComments(startTimeDaily) + endTimeComments(endTimeDaily) + dayLoadComments(loadDaily) + "<br>";
+//            consecutiveLengthComments()
+        }
 
 
         // WIP below
         // if needed, commentary on how early the first class starts for each day
+        function startTimeComments(startTimeDay) {
+
+        }
 
         // if needed, commentary on how late the last class ends for each day
+        function endTimeComments(endTimeDay) {
+
+        }
 
         // if needed, commentary on the class load for each day
+        function dayLoadComments(loadDay) {
+
+        }
 
         // if needed, commentary on the length of consecutive classes for each day
+        function consecutiveLengthComments(consecutiveLengthDay) {
+
+        }
         
         firstAnalysis = false;
     }, false);
