@@ -9,101 +9,187 @@
 </head>
 <body>
     <h1> Course Schedule Analyzer </h1>
-    <p> Input your course name, start time, end time, and number of credits into the form below to get an analysis and commentary. </p>
+    <p> Input your course name, start time, end time, number of credits, and indicate which days your courses take place into the form below to get an analysis and commentary. </p>
 
     <!-- to input names and times (added in script) -->
     <form id="inputCourses"> </form>
 
     <!-- to add more course input slots -->
-    <input type="submit" value="Add More Courses" id="addCourses" />    
+    <input type="submit" value="Add More Courses" id="addCourses" class="buttons" />    
 
-    <!-- days to distinguish when classes are (WIP) -->
-    <form id="days">
-        <!-- checklist for courses under each day -->
-    </form>
+    <!-- to analyze and create commentary for credits -->
+    <input type="submit" value="Analyze Courses" id="analyze" class="buttons" />
 
-    <!-- to analyze and create commentary -->
-    <input type="submit" value="Analyze Courses" id="analyze" />
-    
-    <!-- analysis and commentary -->
-    <div id="analysis"></div>
+    <!-- analysis and commentary on total credits -->
+    <div id="creditAnalysis"></div>
+
+    <!-- days to distinguish when classes are for visualization-->
+    <table id="days" hidden="hidden"> 
+        <tr> 
+            <th></th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+            <th>Sunday</th>
+        </tr> 
+    </table> 
+
+    <!-- analysis and commentary on course load for each day -->
+    <div id="courseAnalysis"></div>
 </body>
 
  <script>
     let courseInputs = 0;
+    let firstAnalysis = true;
 
+    function addCourse(courseNumber) {
+        let courseInputNum = courseInputs + courseNumber;
+        let courseName = "<input type=\"text\" placeholder=\"Course " + courseInputNum + "\" class=\"course" + courseInputNum + "\"/> ";
+        let time = "<input type=\"time\" class=\"course" + courseInputNum + "\"/> ";
+        let credits = "<input type=\"number\" min=\"0\" placeholder=\"Number of Credits\" class=\"course" + courseInputNum + "\" /> ";
+        
+        let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        let checkboxes = "";
+        days.forEach(day => {
+            let checkbox = "<input type=\"checkbox\" id=\"" + day + "\" class=\"course" + courseInputNum + "\"/><label for=\"" + day + "\">" + day + "</label> ";
+            checkboxes += checkbox;
+        });
+        document.getElementById("inputCourses").innerHTML += courseName + time + time + credits + checkboxes + "<br>";
+    }
+
+    // adds course inputs when page loads
     document.addEventListener("DOMContentLoaded", function(){
+        // adds course inputs
         for(let i = 1; i <= 5; i++) {
-            let courseInputNum = courseInputs + i;
-            let courseName = "<input type=\"text\" placeholder=\"Course " + courseInputNum + "\" class=\"course" + courseInputNum + "\"/> ";
-            let time = "<input type=\"time\" class=\"course" + courseInputNum + "\"/> ";
-            let credits = "<input type=\"number\" min=\"0\" placeholder=\"Number of Credits\" class=\"course" + courseInputNum + "\" /> ";
-            document.getElementById("inputCourses").innerHTML += courseName + time + time + credits + "<br>";
+            addCourse(i);
         }
         courseInputs += 5;
     }, false);
 
-    // adds 5 more course inputs when button clicked
+    // adds 3 more course inputs when button clicked
     document.getElementById("addCourses").addEventListener("click", function(){
-        for(let i = 1; i <= 5; i++) {
-            let courseInputNum = courseInputs + i;
-            let courseName = "<input type=\"text\" placeholder=\"Course " + courseInputNum + "\" class=\"course" + courseInputNum + "\"/> ";
-            let time = "<input type=\"time\" class=\"course" + courseInputNum + "\"/> ";
-            let credits = "<input type=\"number\" min=\"0\" placeholder=\"Number of Credits\" class=\"course" + courseInputNum + "\" /> ";
-            document.getElementById("inputCourses").innerHTML += courseName + time + time + credits + "<br>";
+        for(let i = 1; i <= 3; i++) {
+            addCourse(i);
         }
-        courseInputs += 5;
+        courseInputs += 3;
     }, false);
 
     // runs analysis and gives commentary
     document.getElementById("analyze").addEventListener("click", function(){
-        let courses = {};
-        let monday = {};
-        let tuesday = {};
-        let wednesday = {};
-        let thursday = {};
-        let friday = {};
-        let saturday = {};
-        let sunday = {};
+        let courses = {}; // will be a two-dimensional array of courses and start and end times
+        let days = [[], [], [], [], [], [], []]; // each array indicates a day (index 0 is Monday, etc.)
         let totalCredits = 0;
-        let analysis = document.getElementById("analysis");
-        analysis.textContent = "";
+        let creditAnalysis = document.getElementById("creditAnalysis");
+        creditAnalysis.textContent = "";
 
-        // adds to days the course names and times 
-        for(let i = 1; i <= courseInputs; i++) {
-            courses[i - 1] = document.getElementsByClassName("course" + i)[0].value; // names
-            // times (WIP)
-        }
+        // adds to 'courses' array, calculates total credits, and adds a course to the days it takes place
+        for(let courseNum = 1; courseNum <= courseInputs; courseNum++) {
+            let courseName = document.getElementsByClassName("course" + courseNum)[0].value; // name
+            let startTime = document.getElementsByClassName("course" + courseNum)[1].value; // start time
+            let endTime = document.getElementsByClassName("course" + courseNum)[2].value; // end time
+            
+            // calculates total credits
+            let credits = document.getElementsByClassName("course" + courseNum)[3].value;
+            if(!isNaN(parseFloat(credits))) {
+                totalCredits += parseFloat(credits);
+            }
 
-        // total credits
-        for(let i = 1; i <= courseInputs; i++) {
-            if(!isNaN(parseFloat(document.getElementsByClassName("course" + i)[3].value))) {
-                totalCredits += parseFloat(document.getElementsByClassName("course" + i)[3].value);
+            courses[courseNum] = [courseName, startTime, endTime, credits]; // adds to courses array
+
+            // adds a course to the days it takes place
+            for(let day = 0; day < 7; day++) { // day 0 is Monday
+                let checkbox = document.getElementsByClassName("course" + courseNum)[day + 4];
+                if(checkbox.checked) {
+                    days[day][courseNum] = courses[courseNum];
+                }
             }
         }
 
         // commentary on the total number of credits
         if (totalCredits > 0) {
-            analysis.textContent = "Analysis: You are taking a total of " + totalCredits + " credits. ";
+            creditAnalysis.textContent = "Analysis: You are taking a total of " + totalCredits + " credits. ";
             if (totalCredits < 13) {
-                analysis.textContent += "This may not be enough credits to be considered a fulltime student. Please check with your school to confirm. ";
+                creditAnalysis.textContent += "This may not be enough credits to be considered a fulltime student. Please check with your school to confirm. ";
             }
             if (totalCredits > 16) {
-                analysis.textContent += "This may be a lot of credits to take in one semester. Consider taking less classes to prevent an overwhelming semester. "
+                creditAnalysis.textContent += "This may be a lot of credits to take in one semester. Consider taking less classes to prevent an overwhelming semester. "
             }
             if (totalCredits > 20) {
-                analysis.textContent += "This may be too many credits and you may be charged extra. Please check with your school to confirm. ";
+                creditAnalysis.textContent += "This may be too many credits and you may be charged extra. Please check with your school to confirm. ";
             }
-            analysis.textContent += "It is reccomended to take a total number of 15 credits per semester."
+            creditAnalysis.textContent += "It is reccomended to take a total number of 15 credits per semester."
         }
+
+        // makes 'days' table not hidden
+        document.getElementById("days").hidden = false;
+
+        // prints inputted course load information for each day for visualization in table
+        // inspo taken from https://www.w3schools.com/jsref/met_table_insertrow.asp 
+        let daysTable = document.getElementById("days");
+        if (!firstAnalysis){
+            // deletes rows if not first analysis to prep table for new cells
+            for (let i = 0; i < 3; i++){
+                daysTable.deleteRow(1);
+            }
+        }
+        let startTimes = daysTable.insertRow(1);
+        let endTimes = daysTable.insertRow(2);
+        let load = daysTable.insertRow(3);
+
+        startTimes.insertCell(0).innerHTML = "Start Times";
+        endTimes.insertCell(0).innerHTML = "End Times";
+        load.insertCell(0).innerHTML = "Hours of Classes";
+        
+        for (let day = 0; day < 7; day++) {
+            let startTimeDaily = "";
+            let endTimeDaily = "";
+            let loadDaily = 0;
+
+            days[day].forEach(course => {
+                if(startTimeDaily == "") {
+                    startTimeDaily = course[1];
+                } else if (course[1] < startTimeDaily) { // sets startTime if time is earlier
+                    startTimeDaily = course[1];
+                }
+                if (endTimeDaily < course[2]) { // sets endTime if time is later
+                    endTimeDaily = course[2];
+                }
+                loadDaily += parseFloat(course[2]) - parseFloat(course[1]); // calculates daily number of hours of class
+            });
+
+            // adds cells with information
+            if(startTimeDaily != "24:00") {
+                startTimes.insertCell(day + 1).innerHTML = startTimeDaily;
+            // } else {
+            //     startTimes.insertCell(day + 1).innerHTML = "";
+            }
+            if(endTimeDaily != "00:00") {
+                endTimes.insertCell(day + 1).innerHTML = endTimeDaily;
+            // } else {
+            //     endTimes.insertCell(day + 1).innerHTML = "";
+            }
+            if(loadDaily == 1) {
+                load.insertCell(day + 1).innerHTML = loadDaily + " hour";
+            } else if(loadDaily >= 0) {
+                load.insertCell(day + 1).innerHTML = loadDaily + " hours";
+            }
+        }
+
+
 
         // WIP below
         // if needed, commentary on how early the first class starts for each day
 
         // if needed, commentary on how late the last class ends for each day
 
-        // if needed, commentary on the length of consecutive classes for each day
+        // if needed, commentary on the class load for each day
 
+        // if needed, commentary on the length of consecutive classes for each day
+        
+        firstAnalysis = false;
     }, false);
 </script>
 

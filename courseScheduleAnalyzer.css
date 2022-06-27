@@ -4,14 +4,28 @@ body {
     font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-#analysis {
-    padding-top: 2.5%;
-}
-
 #inputCourses {
-    
+    padding-bottom: 1%;
 }
 
 #days {
+    padding: 1%;
+}
 
+table, tr {
+    border: 1px solid black;
+    border-collapse: collapse;
+    width: 88%;
+    background-color: white;
+}
+
+th, td {
+    border: 1px solid black;
+    width: 11%;
+    height: 20px;
+}
+
+#creditAnalysis, #courseAnalysis {
+    padding-top: 1%;   
+    padding-bottom: 1%; 
 }
