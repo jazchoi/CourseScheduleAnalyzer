@@ -23,19 +23,8 @@
     <!-- analysis and commentary on total credits -->
     <div id="creditAnalysis"></div>
 
-    <!-- days to distinguish when classes are for visualization-->
-    <table id="days" hidden="hidden"> 
-        <tr> 
-            <th></th>
-            <th>Monday</th>
-            <th>Tuesday</th>
-            <th>Wednesday</th>
-            <th>Thursday</th>
-            <th>Friday</th>
-            <th>Saturday</th>
-            <th>Sunday</th>
-        </tr> 
-    </table> 
+    <!-- days to distinguish when classes are for visualization (added in script when analyzed) -->
+    <table id="days"> </table> 
 
     <!-- analysis and commentary on course load for each day -->
     <div id="courseAnalysis"></div>
@@ -43,21 +32,21 @@
 
  <script>
     let courseInputs = 0;
-    let firstAnalysis = true;
+    let daysStrings = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
+    // function to add a course input
     function addCourse(courseNumber) {
         let courseInputNum = courseInputs + courseNumber;
         let courseName = "<input type=\"text\" placeholder=\"Course " + courseInputNum + "\" class=\"course" + courseInputNum + "\"/> ";
         let time = "<input type=\"time\" class=\"course" + courseInputNum + "\"/> ";
         let credits = "<input type=\"number\" min=\"0\" placeholder=\"Number of Credits\" class=\"course" + courseInputNum + "\" /> ";
         
-        let days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         let checkboxes = "";
-        days.forEach(day => {
+        daysStrings.forEach(day => {
             let checkbox = "<input type=\"checkbox\" id=\"" + day + "\" class=\"course" + courseInputNum + "\"/><label for=\"" + day + "\">" + day + "</label> ";
             checkboxes += checkbox;
         });
-        document.getElementById("inputCourses").innerHTML += courseName + time + time + credits + checkboxes + "<br>";
+        document.getElementById("inputCourses").insertAdjacentHTML("beforeend", courseName + time + time + credits + checkboxes + "<br>");
     }
 
     // adds course inputs when page loads
@@ -77,16 +66,30 @@
         courseInputs += 3;
     }, false);
 
+    // function to create table
+    function addTable() {
+        deleteTable(); // clears table for every new analysis
+        let daysTable = document.getElementById("days");
+        daysTable.insertAdjacentHTML("beforeend", "<tr id=\"dayHeaders\"> <th></th> </tr>");
+        daysStrings.forEach(day => {
+            document.getElementById("dayHeaders").insertAdjacentHTML("beforeend", "<th>" + day + "</th>");
+        });
+    }
+
+    // function to delete table
+    function deleteTable() {
+        document.getElementById("days").innerHTML = "";
+    }
+
     // runs analysis and gives commentary
     document.getElementById("analyze").addEventListener("click", function(){
         let courses = {}; // will be a two-dimensional array of courses and start and end times
         let days = [[], [], [], [], [], [], []]; // each array indicates a day (index 0 is Monday, etc.)
-        let daysStrings = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         let totalCredits = 0;
         let creditAnalysis = document.getElementById("creditAnalysis");
-        creditAnalysis.textContent = "";
         let courseAnalysis = document.getElementById("courseAnalysis");
-        courseAnalysis.textContent = "";
+        creditAnalysis.textContent = ""; // clears text for every new analysis
+        courseAnalysis.textContent = ""; // clears text for every new analysis
 
         // adds to 'courses' array, calculates total credits, and adds a course to the days it takes place
         for(let courseNum = 1; courseNum <= courseInputs; courseNum++) {
@@ -113,58 +116,57 @@
 
         // commentary on the total number of credits
         if (totalCredits > 0) {
-            creditAnalysis.textContent = "Analysis: You are taking a total of " + totalCredits + " credits. ";
+            creditAnalysis.insertAdjacentText("beforeend", "Analysis: You are taking a total of " + totalCredits + " credits. ");
             if (totalCredits < 13) {
-                creditAnalysis.textContent += "This may not be enough credits to be considered a fulltime student. Please check with your school to confirm. ";
+                creditAnalysis.insertAdjacentText("beforeend", "This may not be enough credits to be considered a fulltime student. Please check with your school to confirm. ");
             }
             if (totalCredits > 16) {
-                creditAnalysis.textContent += "This may be a lot of credits to take in one semester. Consider taking less classes to prevent an overwhelming semester. "
+                creditAnalysis.insertAdjacentText("beforeend", "This may be a lot of credits to take in one semester. Consider taking less classes to prevent an overwhelming semester. ");
             }
             if (totalCredits > 20) {
-                creditAnalysis.textContent += "This may be too many credits and you may be charged extra. Please check with your school to confirm. ";
+                creditAnalysis.insertAdjacentText("beforeend", "This may be too many credits and you may be charged extra. Please check with your school to confirm. ");
             }
-            creditAnalysis.textContent += "It is reccomended to take a total number of 15 credits per semester."
+            creditAnalysis.insertAdjacentText("beforeend", "It is reccomended to take a total number of 15 credits per semester.");
         }
 
-        // makes 'days' table not hidden
-        document.getElementById("days").hidden = false;
+        // creates table for "days"
+        let daysTable = document.getElementById("days");
+        addTable(); // adds table for every new analysis
 
         // prints inputted course load information for each day for visualization in table
         // inspo taken from https://www.w3schools.com/jsref/met_table_insertrow.asp 
-        let daysTable = document.getElementById("days");
-        if (!firstAnalysis){
-            // deletes rows if not first analysis to prep table for new cells
-            for (let i = 0; i < 3; i++){
-                daysTable.deleteRow(1);
-            }
-        }
         let startTimes = daysTable.insertRow(1);
         let endTimes = daysTable.insertRow(2);
         let load = daysTable.insertRow(3);
-
-        startTimes.insertCell(0).innerHTML = "Start Times";
-        endTimes.insertCell(0).innerHTML = "End Times";
+        let consecutiveLengths = daysTable.insertRow(4);
+        startTimes.insertCell(0).innerHTML = "Start Time";
+        endTimes.insertCell(0).innerHTML = "End Time";
         load.insertCell(0).innerHTML = "Hours of Classes";
+        consecutiveLengths.insertCell(0).innerHTML = "Longest Consecutative Length of Classes (Approx)";
         
         for (let day = 0; day < 7; day++) { // for each day, for all courses that occur in one day
             let startTimeDaily = "";
             let endTimeDaily = "";
             let loadDaily = 0;
+            let consecutiveLengthDaily = [0]; // the index is occupied by the hour of the day that it equals (e.g. 1 at index 1 for 1AM, 12 at index 12 for 12noon); index 0 has the number of consecutive hours
 
             days[day].forEach(course => {
-                if(startTimeDaily == "") {
-                    startTimeDaily = course[1];
-                } else if (course[1] < startTimeDaily) { // sets startTime if time is earlier
+                if (startTimeDaily == "" || course[1] < startTimeDaily) { // sets startTime if time is earlier or blank
                     startTimeDaily = course[1];
                 }
-                
                 if (endTimeDaily < course[2]) { // sets endTime if time is later
                     endTimeDaily = course[2];
                 }
 
-                let startTimeFloat = parseFloat(course[1].substring(0, 2)) + (course[1].substring(3, 5) / 60);
-                let endTimeFloat = parseFloat(course[2].substring(0, 2)) + (course[2].substring(3, 5) / 60);
+                let startHour = parseFloat(course[1].substring(0, 2));
+                let endHour = parseFloat(course[2].substring(0, 2));
+                let startTimeFloat = startHour + (course[1].substring(3, 5) / 60);
+                let endTimeFloat = endHour + (course[2].substring(3, 5) / 60);
                 loadDaily += endTimeFloat - startTimeFloat; // calculates daily number of hours of class
+            
+                for (let hour = Math.round(startTimeFloat); hour <= Math.round(endTimeFloat); hour++) {
+                    consecutiveLengthDaily[hour] = hour;
+                }
             });
 
             // adds cells with information
@@ -194,11 +196,44 @@
                 load.insertCell(day + 1).innerHTML = loadDaily.toFixed(2) + " hours";
             }
 
+            let stretchResults = longestStretch(true, consecutiveLengthDaily); // [duration, start time]
+            consecutiveLengthDaily[0] = stretchResults[0];
+            let formattedConsecutiveLengthDaily = consecutiveLengthDaily[0] + " hours ";
+            if (stretchResults[0] != 0) {
+                formattedConsecutiveLengthDaily += "(starts around " + stretchResults[1] + ")";
+            }
+            consecutiveLengths.insertCell(day + 1).innerHTML = formattedConsecutiveLengthDaily;
+
             // commentary functions called
-            courseAnalysis.innerHTML += daysStrings[day] + ": " + startTimeComments(startTimeDaily) + endTimeComments(endTimeDaily) + dayLoadComments(loadDaily) + "<br>";
-//            consecutiveLengthComments()
+            courseAnalysis.innerHTML += daysStrings[day] + ": " + startTimeComments(startTimeDaily) + endTimeComments(endTimeDaily) + dayLoadComments(loadDaily) + consecutiveLengthComments(consecutiveLengthDaily) + "<br>";
         }
 
+        // function to find and return the longest stretch of classes or free time
+        // NEED TO FIX!!!
+        function longestStretch(isClassTime, takenTimes) {
+            let longestLength = 0;
+            let startHour = 0;
+            console.log(takenTimes);
+            if (isClassTime) {
+                let tempLength = 0;
+                let tempStart = 0;
+                for (let index = 0; index < takenTimes.length; index++) {
+                    if (takenTimes[index] > 0) {
+                        tempLength++;
+                        if (tempLength == 1) {
+                            tempStart = index;
+                        }
+                        if (tempLength > longestLength) {
+                            longestLength = tempLength - 1;
+                            startHour = tempStart;
+                        }
+                    } else {
+                        tempLength = 0;
+                    }
+                }
+            }
+            return [longestLength, startHour];
+        }
 
         // WIP below
         // if needed, commentary on how early the first class starts for each day
@@ -220,8 +255,6 @@
         function consecutiveLengthComments(consecutiveLengthDay) {
 
         }
-        
-        firstAnalysis = false;
     }, false);
 </script>
 
