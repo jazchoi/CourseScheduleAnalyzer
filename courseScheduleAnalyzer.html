@@ -198,58 +198,114 @@
             }
 
             let stretchResults = longestStretch(true, consecutiveLengthDaily); // returns [duration, start time of stretch]
-            let formattedConsecutiveLengthDaily = stretchResults[0] + " hours ";
+            let formattedConsecutiveLengthDaily = "";
+            if(stretchResults[0] == 1) {
+                formattedConsecutiveLengthDaily = stretchResults[0].toFixed(2) + " hour";
+            } else {
+                formattedConsecutiveLengthDaily = stretchResults[0].toFixed(2) + " hours";
+            }
             if (stretchResults[0] != 0) {
-                formattedConsecutiveLengthDaily += "(starts around " + stretchResults[1] + ")";
+                formattedConsecutiveLengthDaily += " (starts around ";
+                let hour = parseInt(stretchResults[1]);
+                let minute = ((stretchResults[1] - parseInt(stretchResults[1])) * 60).toFixed(0) + "";
+                if(minute.length < 2) {
+                    minute = "0" + minute;
+                }
+                if(hour < 12) { // formats 24:00 time to 12-hour with AM
+                    formattedConsecutiveLengthDaily += hour + ":" + minute + " AM)";
+                } else if(hour == 12) {
+                    formattedConsecutiveLengthDaily += hour + ":" + minute + " PM)";
+                } else { // formats 24:00 time to 12-hour with PM
+                    formattedConsecutiveLengthDaily += (hour - 12) + ":" + minute + " PM)";
+                }
             }
             consecutiveLengths.insertCell(day + 1).innerHTML = formattedConsecutiveLengthDaily;
 
             // commentary functions called
-            courseAnalysis.innerHTML += daysStrings[day] + ": " + startTimeComments(startTimeDaily) + endTimeComments(endTimeDaily) + dayLoadComments(loadDaily) + consecutiveLengthComments(stretchResults) + "<br>";
+            let commentary = startTimeComments(startTimeDaily) + endTimeComments(endTimeDaily) + dayLoadComments(loadDaily) + consecutiveLengthComments(stretchResults);
+            if(commentary != "") {
+                courseAnalysis.innerHTML += daysStrings[day] + ": " + commentary + "<br><br>";
+            }
         }
 
         // function to find and return the longest stretch of classes or free time
         function longestStretch(isClassTime, takenTimes) {
             let longestLength = 0;
             let startHour = 0;
-            let organizedTimes = takenTimes.sort(function(a, b) {
+            let organizedTimes = structuredClone(takenTimes);
+            organizedTimes.sort(function(a, b) {
                 return a - b;
             });
+
+            // checks that there are no two classes at the same time
+            for (let i = 0; i < organizedTimes.length; i += 2) {
+                let start = organizedTimes[i];
+                let oldIndex = takenTimes.findIndex((element) => {return element == start});
+                if (organizedTimes[i + 1] != takenTimes[oldIndex + 1]) {
+                    return [longestLength, startHour];
+                }
+                takenTimes[oldIndex] = -1;
+                takenTimes[oldIndex + 1] = -1;
+            }
 
             if (isClassTime) { // for longest stretch of class time
                 let tempLength = 0;
                 let tempStart = 0;
-                for (let start = 0; start < organizedTimes.length; start + 2) {
-                        tempLength += organizedTimes[start + 1] - organizedTimes[start];
+                for (let start = 0; start < organizedTimes.length; start += 2) {
+                    if (tempLength == 0) {
                         tempStart = organizedTimes[start];
-                        if (tempLength > longestLength) {
-                            longestLength = tempLength;
-                            startHour = tempStart;
+                    }
+                    
+                    tempLength += organizedTimes[start + 1] - organizedTimes[start];
+
+                    if (tempLength > longestLength) {
+                        longestLength = tempLength;
+                        startHour = tempStart;
+                    }
+
+                    if (organizedTimes[start + 2] != null && organizedTimes[start + 2] - organizedTimes[start + 1] >= 0.5) {
+                        tempLength = 0;
                     }
                 }
             }
+
             return [longestLength, startHour];
         }
 
-        // WIP below
         // if needed, commentary on how early the first class starts for each day
         function startTimeComments(startTimeDay) {
-
+            let commentary = "";
+            if (startTimeDay > "00:00" && startTimeDay < "10:00") {
+                commentary += "Your first class of the day starts quite early. It is reccomended for your first class to start after 10:00 AM to prevent oversleeping and exhaustion. "
+            }
+            return commentary;
         }
 
         // if needed, commentary on how late the last class ends for each day
         function endTimeComments(endTimeDay) {
-
+            let commentary = "";
+            if (endTimeDay > "17:00") {
+                commentary += "Your last class of the day ends quite late. It is reccomended for your last class to end before 5:00 PM to have time for other activities and rest. "
+            }
+            return commentary;
         }
 
         // if needed, commentary on the class load for each day
         function dayLoadComments(loadDay) {
-
+            let commentary = "";
+            if (loadDay > 5) {
+                commentary += "Your class load this day may be a lot. Make sure you have enough breaks in between classes to grab a meal and rest up. "
+            }
+            return commentary;
         }
 
         // if needed, commentary on the length of consecutive classes for each day
-        function consecutiveLengthComments(consecutiveLengthDay) {
-
+        function consecutiveLengthComments(consecutiveLengthDay) { // parameters are [duration, start time of stretch]
+            let commentary = "";
+            if (consecutiveLengthDay[0] > 3) {
+                commentary += "Your longest length of classes is longer than the recommended 3 hours. Try to schedule your classes so you can have a break in between. "
+            }
+            return commentary;
         }
     }, false);
 </script>
